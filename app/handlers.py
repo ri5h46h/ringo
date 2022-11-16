@@ -20,6 +20,7 @@ from app.utils import (
     admins_ids_mkup,
     agree_btn,
     average_nb_secs,
+    fmt_delta,
     mention_markdown,
     withAuth,
 )
@@ -419,13 +420,23 @@ async def has_joined(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     for uid, name, lang in not_banned
                 ]
             )
-            + "!"
+            + "! "
+            + "\U0001F383"
         ).capitalize()
 
         if settings and hasattr(settings, "show_join_time") and settings.show_join_time:
             datetimes = await get_users_at(chat_id, new_members_ids)
             if average_join_time := average_nb_secs(datetimes):
-                greetings += f" It took you {average_join_time} seconds for joining."
+                if average_join_time < 12:
+                    greetings += (
+                        f" It took you {average_join_time} seconds for joining. Did you actually _read_ the conditions? "
+                        + "\U0001F928"
+                    )
+                elif average_join_time > 10800:
+                    greetings += (
+                        f" It took you {fmt_delta(average_join_time)} for joining. "
+                        + "\U0001F62A"
+                    )
 
         await context.bot.send_message(
             chat_id,
